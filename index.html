@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실무 만능 모듈 무기고</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+  :root {
+    --bg: #1a1e2e;
+    --surface: #242838;
+    --surface2: #2d3348;
+    --border: #3a4060;
+    --text: #e8ecf8;
+    --muted: #8892b0;
+    --gold: #f0c040;
+    --gold2: #c9a227;
+    --teal: #2eb5a0;
+    --blue: #4a90e2;
+    --purple: #9b59b6;
+    --rose: #e84a5f;
+    --orange: #e87a40;
+    --green: #40c878;
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* 헤더 */
+  header {
+    background: linear-gradient(135deg, #0d1220 0%, #1a2040 100%);
+    padding: 2rem 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-row {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+  }
+  .chip { 
+    background: var(--gold2); color: #1a1200;
+    font-size: 0.68rem; font-weight: 900; padding: 0.2rem 0.7rem;
+    border-radius: 20px; letter-spacing: 0.08em;
+  }
+  .chip.new { background: var(--rose); color: white; }
+  h1 { font-size: 1.5rem; font-weight: 900; line-height: 1.2; }
+  h1 em { color: var(--gold); font-style: normal; }
+  .sub { color: var(--muted); font-size: 0.8rem; margin-top: 0.3rem; }
+
+  /* 탭바 */
+  .tab-bar {
+    display: flex; gap: 0; overflow-x: auto;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 0.7rem 1.1rem;
+    font-size: 0.78rem; font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .tab:hover { color: var(--text); }
+
+  /* 메인 */
+  main { padding: 1.2rem 1rem 4rem; max-width: 860px; margin: 0 auto; }
+
+  /* 섹션 */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* 상단 안내 */
+  .guide {
+    background: linear-gradient(135deg, rgba(201,162,39,0.12), rgba(201,162,39,0.05));
+    border: 1px solid rgba(201,162,39,0.3);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.8rem;
+    line-height: 1.75;
+    color: #ccc8b0;
+    margin-bottom: 1.5rem;
+  }
+  .guide strong { color: var(--gold); }
+
+  /* 기존 6개 모듈 요약 */
+  .existing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .exist-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 0.8rem;
+    font-size: 0.75rem;
+  }
+  .exist-num {
+    font-size: 0.65rem; color: var(--muted);
+    margin-bottom: 0.15rem;
+  }
+  .exist-name { font-weight: 700; color: var(--teal); }
+
+  /* 섹션 제목 */
+  .sec-label {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+    color: var(--muted); text-transform: uppercase;
+    margin: 1.5rem 0 0.8rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .sec-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* 모듈 카드 */
+  .module {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .module:hover { border-color: rgba(201,162,39,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .module.open { border-color: var(--gold2); }
+
+  .module-header {
+    display: flex; align-items: stretch;
+  }
+  .module-num {
+    min-width: 52px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 0.9rem 0.4rem;
+    font-size: 1.1rem; font-weight: 900;
+    flex-shrink: 0;
+  }
+  .module-num .m-label {
+    font-size: 0.6rem; font-weight: 400;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 1px;
+  }
+  .module-info { flex: 1; padding: 0.85rem 1rem; }
+  .module-tag {
+    display: inline-block;
+    font-size: 0.65rem; font-weight: 700;
+    padding: 0.15rem 0.55rem; border-radius: 10px;
+    margin-bottom: 0.3rem;
+  }
+  .module-title { font-size: 0.95rem; font-weight: 700; line-height: 1.3; }
+  .module-desc { font-size: 0.73rem; color: var(--muted); margin-top: 0.2rem; }
+  .module-toggle {
+    padding: 0 0.9rem;
+    display: flex; align-items: center;
+    color: var(--muted); font-size: 1rem;
+    transition: transform 0.25s; flex-shrink: 0;
+  }
+  .module.open .module-toggle { transform: rotate(180deg); }
+
+  /* 모듈 바디 */
+  .module-body {
+    display: none;
+    padding: 0 1rem 1.2rem;
+    border-top: 1px solid var(--border);
+  }
+  .module.open .module-body { display: block; }
+
+  /* 필드 그룹 */
+  .field-group { margin-top: 1rem; }
+  .field-label {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--blue); text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid rgba(74,144,226,0.2);
+  }
+  .field-label.gold { color: var(--gold); border-bottom-color: rgba(201,162,39,0.2); }
+  .field-label.teal { color: var(--teal); border-bottom-color: rgba(46,181,160,0.2); }
+  .field-label.rose { color: var(--rose); border-bottom-color: rgba(232,74,95,0.2); }
+  .field-label.green { color: var(--green); border-bottom-color: rgba(64,200,120,0.2); }
+
+  /* 인라인 테이블 */
+  .mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.76rem;
+    margin-top: 0.2rem;
+  }
+  .mini-table th {
+    background: rgba(255,255,255,0.05);
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.68rem;
+  }
+  .mini-table td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid rgba(58,64,96,0.5);
+    line-height: 1.5;
+    color: var(--text);
+    vertical-align: top;
+  }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .mini-table .t-num {
+    background: rgba(255,255,255,0.08);
+    text-align: center; font-weight: 700;
+    color: var(--gold); width: 28px;
+  }
+  .mini-table .t-cat {
+    font-weight: 700; color: var(--text);
+    width: 80px; white-space: nowrap;
+  }
+
+  /* 3단 그리드 */
+  .tri-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5rem; margin-top: 0.3rem;
+  }
+  .tri-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  .tri-title {
+    font-size: 0.7rem; font-weight: 700;
+    color: var(--gold); margin-bottom: 0.3rem;
+  }
+  .tri-items { color: #aaa; line-height: 1.7; }
+
+  /* 흐름 단계 */
+  .flow {
+    display: flex; gap: 0; flex-wrap: wrap;
+    margin-top: 0.4rem;
+  }
+  .flow-step {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.74rem;
+    display: flex; flex-direction: column;
+    align-items: center; text-align: center;
+    flex: 1; min-width: 80px;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '▶';
+    position: absolute; right: -10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold); font-size: 0.6rem; z-index: 1;
+  }
+  .flow-step:first-child { border-radius: 6px 0 0 6px; }
+  .flow-step:last-child { border-radius: 0 6px 6px 0; }
+  .flow-num { font-size: 0.65rem; color: var(--muted); }
+  .flow-text { font-weight: 700; color: var(--text); margin-top: 0.15rem; font-size: 0.72rem; }
+  .flow-sub { font-size: 0.65rem; color: var(--muted); margin-top: 0.1rem; }
+
+  /* 키워드 필 */
+  .kw-row { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem; }
+  .kw {
+    background: rgba(74,144,226,0.12);
+    border: 1px solid rgba(74,144,226,0.25);
+    color: #8ab8ee;
+    font-size: 0.72rem; padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+  }
+  .kw.g { background: rgba(46,181,160,0.1); border-color: rgba(46,181,160,0.25); color: #7ad8c8; }
+  .kw.y { background: rgba(240,192,64,0.1); border-color: rgba(240,192,64,0.25); color: #d4aa40; }
+  .kw.r { background: rgba(232,74,95,0.1); border-color: rgba(232,74,95,0.25); color: #e88494; }
+
+  /* 사용 팁 박스 */
+  .tip-box {
+    background: rgba(240,192,64,0.06);
+    border-left: 3px solid var(--gold2);
+    border-radius: 0 6px 6px 0;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.78rem;
+    color: #b8a870;
+    line-height: 1.75;
+    margin-top: 0.8rem;
+  }
+  .tip-box::before { content: '💡 활용 팁 · '; font-style: normal; font-weight: 700; color: var(--gold); }
+
+  /* 사용 가능 주제 태그 */
+  .topic-row { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.35rem; }
+  .topic { 
+    font-size: 0.68rem; font-weight: 700;
+    padding: 0.2rem 0.55rem; border-radius: 10px;
+  }
+
+  /* 색상 세트 */
+  .c1 .module-num { background: linear-gradient(135deg, #1a4a8a, #2e7dd1); }
+  .c1 .module-tag { background: rgba(46,125,209,0.15); color: #6ab0e8; }
+  .c2 .module-num { background: linear-gradient(135deg, #2cb5a0, #1a8a78); }
+  .c2 .module-tag { background: rgba(44,181,160,0.15); color: #6ad8c8; }
+  .c3 .module-num { background: linear-gradient(135deg, #9b59b6, #7a3a9a); }
+  .c3 .module-tag { background: rgba(155,89,182,0.15); color: #c89ae8; }
+  .c4 .module-num { background: linear-gradient(135deg, #c94040, #9a2020); }
+  .c4 .module-tag { background: rgba(201,64,64,0.15); color: #e89090; }
+  .c5 .module-num { background: linear-gradient(135deg, #e87a40, #b85020); }
+  .c5 .module-tag { background: rgba(232,122,64,0.15); color: #f0b090; }
+  .c6 .module-num { background: linear-gradient(135deg, #40a060, #206840); }
+  .c6 .module-tag { background: rgba(64,160,96,0.15); color: #80d0a0; }
+  .c7 .module-num { background: linear-gradient(135deg, #c9a227, #8a6a10); }
+  .c7 .module-tag { background: rgba(201,162,39,0.15); color: #d4b858; }
+  .c8 .module-num { background: linear-gradient(135deg, #2e4a9a, #1a2a6a); }
+  .c8 .module-tag { background: rgba(46,74,154,0.15); color: #90a8e8; }
+
+  /* 대응표 */
+  .match-table { width: 100%; border-collapse: collapse; font-size: 0.76rem; margin-top: 0.5rem; }
+  .match-table th {
+    background: rgba(201,162,39,0.12); color: var(--gold);
+    padding: 0.5rem 0.7rem; text-align: left; font-size: 0.7rem;
+    border-bottom: 1px solid rgba(201,162,39,0.2);
+  }
+  .match-table td {
+    padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--border);
+    vertical-align: top; line-height: 1.6;
+  }
+  .match-table tr:last-child td { border-bottom: none; }
+  .match-table .subject { font-weight: 700; color: var(--teal); white-space: nowrap; }
+  .match-table .modules { color: var(--muted); }
+
+  @media (max-width: 500px) {
+    .tri-grid { grid-template-columns: 1fr; }
+    .existing-grid { grid-template-columns: repeat(2, 1fr); }
+    .flow { flex-direction: column; }
+    .flow-step::after { display: none; }
+    .flow-step { border-radius: 6px !important; margin-bottom: 2px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="chip">실무 만능 모듈</div>
+    <div class="chip new">NEW +6</div>
+  </div>
+  <h1>충남 장학사 실무 <em>무기고 확장판</em></h1>
+  <p class="sub">기존 6개 모듈 + 신규 6개 모듈 = 총 12개 만능 모듈</p>
+</header>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="showTab('new')">🆕 신규 6개 모듈</div>
+  <div class="tab" onclick="showTab('guide')">📌 주제별 조합 가이드</div>
+  <div class="tab" onclick="showTab('existing')">📂 기존 6개 요약</div>
+</div>
+
+<main>
+
+<!-- ===== 탭1: 신규 모듈 ===== -->
+<div class="section active" id="tab-new">
+
+  <div class="guide">
+    <strong>신규 모듈 설계 원칙:</strong> 기존 6개가 "사업 운영 방식"이라면, 신규 6개는 <strong>"제도·진단·데이터·평가·소통·안전망"</strong> 영역의 무기입니다.<br>
+    두 세트를 자유롭게 조합하면 어떤 주제에도 완성도 높은 실무안을 작성할 수 있습니다.
+  </div>
+
+  <!-- ─── 모듈 7 ─── -->
+  <div class="module c1" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>7</div>
+      <div class="module-info">
+        <div class="module-tag">진단 · 데이터 기반</div>
+        <div class="module-title">디지털 기반 진단-분석-환류 시스템 구축</div>
+        <div class="module-desc">과학적 진단→맞춤 지원→데이터 환류의 선순환 체계 / AI·에듀테크 활용</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+
+      <div class="field-group">
+        <div class="field-label">📋 운영 흐름 (표 형식)</div>
+        <table class="mini-table">
+          <tr>
+            <th class="t-num">순</th>
+            <th>단계</th>
+            <th>세부 내용</th>
+            <th>활용 도구</th>
+          </tr>
+          <tr><td class="t-num">1</td><td class="t-cat">진단</td><td>000 진단 검사 실시 (학기별 1회 이상)<br>학습·정서·환경 요인 다면적 진단</td><td>온채움·온한글·마주온</td></tr>
+          <tr><td class="t-num">2</td><td class="t-cat">분석</td><td>교육데이터 분석 시스템으로 학생별 이력 관리<br>집단·개인 수준 분석 보고서 생성</td><td>마주온 교육데이터 분석 시스템</td></tr>
+          <tr><td class="t-num">3</td><td class="t-cat">지원</td><td>분석 결과 기반 맞춤형 지원 연계<br>담임-전문교사-지원청 협력 대응</td><td>학생맞춤통합지원팀</td></tr>
+          <tr><td class="t-num">4</td><td class="t-cat">환류</td><td>지원 효과 재진단, 결과 데이터 환류<br>차년도 계획 수립 반영</td><td>유레카 설문·결과 분석</td></tr>
+        </table>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label teal">🔑 핵심 키워드</div>
+        <div class="kw-row">
+          <span class="kw y">디지털역량지수</span><span class="kw y">온채움·온한글·온평가</span>
+          <span class="kw">마주온 교육데이터 분석</span><span class="kw">AI 맞춤형 학습지원</span>
+          <span class="kw g">진단-선정-지원 체계</span><span class="kw g">학생맞춤통합지원팀</span>
+          <span class="kw">사고도구어 기반 온독지수</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label rose">🎯 적용 가능 주제</div>
+        <div class="topic-row">
+          <span class="topic" style="background:rgba(46,181,160,0.15);color:#7ad8c8">기초학력</span>
+          <span class="topic" style="background:rgba(74,144,226,0.15);color:#8ab8ee">AI·디지털교육</span>
+          <span class="topic" style="background:rgba(155,89,182,0.15);color:#c89ae8">독서·문해력</span>
+          <span class="topic" style="background:rgba(232,122,64,0.15);color:#f0b090">학생정신건강</span>
+          <span class="topic" style="background:rgba(201,64,64,0.15);color:#e88494">교육복지</span>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        기존 모듈1(현장지원단)과 결합하면 "진단→현장 지원→재진단" 완전 사이클 완성. "유레카 설문"과 "마주온 교육데이터 분석"을 명시하면 채점 키워드 확보.
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 모듈 8 ─── -->
+  <div class="module c2" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>8</div>
+      <div class="module-info">
+        <div class="module-tag">이끎학교 · 선도모델</div>
+        <div class="module-title">이끎학교(선도학교) 운영과 상향 평준화</div>
+        <div class="module-desc">정책학교 선정→현장 적합 모델 창출→도내 일반화 확산 / 교원 자발성 기반</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+
+      <div class="field-group">
+        <div class="field-label">📋 단계별 운영 내용</div>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num">1단계</div>
+            <div class="flow-text">이끎학교 선정</div>
+            <div class="flow-sub">공모·추천<br>지역 안배</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">2단계</div>
+            <div class="flow-text">모델 창출</div>
+            <div class="flow-sub">교육과정-수업-평가<br>일체화 연구</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">3단계</div>
+            <div class="flow-text">현장 검증</div>
+            <div class="flow-sub">성과나눔회<br>모니터링</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">4단계</div>
+            <div class="flow-text">도내 확산</div>
+            <div class="flow-sub">마주온 탑재<br>사례집 발간</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">📋 운영 상세 (표)</div>
+        <table class="mini-table">
+          <tr><th class="t-num">순</th><th>구분</th><th>운영 내용</th><th>비고</th></tr>
+          <tr><td class="t-num">1</td><td class="t-cat">선정</td><td>000 이끎학교 공모·선정 (초○교, 중○교, 고○교)</td><td>3월</td></tr>
+          <tr><td class="t-num">2</td><td class="t-cat">지원</td><td>목적사업비 교부, 현장컨설팅 지원</td><td>연중</td></tr>
+          <tr><td class="t-num">3</td><td class="t-cat">나눔</td><td>성과나눔회 개최, 우수 사례 공개수업</td><td>11~12월</td></tr>
+          <tr><td class="t-num">4</td><td class="t-cat">확산</td><td>마주온 탑재, 사례집 발간, 도내 일반교 공유</td><td>12월</td></tr>
+        </table>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label teal">🔑 핵심 키워드</div>
+        <div class="kw-row">
+          <span class="kw y">이끎학교</span><span class="kw y">AI 정보교육 중점학교</span>
+          <span class="kw y">탄소중립이끎학교</span><span class="kw y">민주학교</span>
+          <span class="kw g">충남형 인공지능학교</span><span class="kw g">교육과정-수업-평가 일체화</span>
+          <span class="kw">상향 평준화</span><span class="kw">마주온 탑재·확산</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label rose">🎯 적용 가능 주제</div>
+        <div class="topic-row">
+          <span class="topic" style="background:rgba(74,144,226,0.15);color:#8ab8ee">AI·디지털교육</span>
+          <span class="topic" style="background:rgba(64,160,96,0.15);color:#80d0a0">환경교육</span>
+          <span class="topic" style="background:rgba(46,74,154,0.15);color:#90a8e8">민주시민교육</span>
+          <span class="topic" style="background:rgba(201,64,64,0.15);color:#e88494">인성교육</span>
+          <span class="topic" style="background:rgba(155,89,182,0.15);color:#c89ae8">교육과정 혁신</span>
+          <span class="topic" style="background:rgba(232,74,95,0.15);color:#e88494">세계시민교육</span>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        기존 모듈4(충남형 일반화 모델)와 동일 계열이지만, 이 모듈은 "이끎학교 지정·운영" 자체에 초점. 학교 명칭에 주제어를 반드시 삽입할 것 (예: "AI 정보교육 이끎학교", "생태환경 이끎학교").
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 모듈 9 ─── -->
+  <div class="module c3" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>9</div>
+      <div class="module-info">
+        <div class="module-tag">학생 참여 · 자치</div>
+        <div class="module-title">학생 주도 자치·동아리 활동 지원</div>
+        <div class="module-desc">학생이 설계·운영·평가하는 자치 구조 / 실천 중심 참여 확대 / 학생참여예산제 연계</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+
+      <div class="field-group">
+        <div class="field-label">📋 운영 내용 (표)</div>
+        <table class="mini-table">
+          <tr><th class="t-num">순</th><th>구분</th><th>운영 내용</th><th>지원</th></tr>
+          <tr><td class="t-num">1</td><td class="t-cat">동아리</td><td>000 학생 동아리 운영 (1교 1동아리 권장)<br>실생활 연계 탐구·실천 활동</td><td>목적사업비 교부</td></tr>
+          <tr><td class="t-num">2</td><td class="t-cat">자치회</td><td>학급회·학생회 정기 운영 (월 1~2회)<br>학생참여예산제(학교기본운영비 1%) 편성</td><td>운영비 지원</td></tr>
+          <tr><td class="t-num">3</td><td class="t-cat">성과</td><td>실천 결과 발표 나눔마당 개최<br>우수 동아리 교육감 표창</td><td>행복교육지구 연계</td></tr>
+          <tr><td class="t-num">4</td><td class="t-cat">연합</td><td>시·군 학생회 연합회 운영<br>충남 학생원탁토론회 개최</td><td>교육지원청 주관</td></tr>
+        </table>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label teal">🔑 핵심 키워드</div>
+        <div class="kw-row">
+          <span class="kw y">학생참여예산제(1%)</span><span class="kw y">충남 학생원탁토론회</span>
+          <span class="kw y">충남 시·군 학생회 연합회</span>
+          <span class="kw g">1교 1동아리</span><span class="kw g">들락날락</span>
+          <span class="kw">학생자치 교사·학생지원단</span>
+          <span class="kw">학생회 공약이행 지원사업(100교)</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label rose">🎯 적용 가능 주제</div>
+        <div class="topic-row">
+          <span class="topic" style="background:rgba(155,89,182,0.15);color:#c89ae8">민주시민·학생자치</span>
+          <span class="topic" style="background:rgba(201,64,64,0.15);color:#e88494">인성교육</span>
+          <span class="topic" style="background:rgba(64,160,96,0.15);color:#80d0a0">환경교육</span>
+          <span class="topic" style="background:rgba(46,181,160,0.15);color:#7ad8c8">세계시민교육</span>
+          <span class="topic" style="background:rgba(74,144,226,0.15);color:#8ab8ee">AI·진로교육</span>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        기존 모듈3(학생 주도 프로젝트)과 다른 포인트: 이 모듈은 "자치·예산·연합" 구조에 집중. 민주시민교육·학교폭력예방·환경교육 모두에서 "들락날락 연계"와 "학생참여예산제" 키워드 필수 삽입.
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 모듈 10 ─── -->
+  <div class="module c4" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>10</div>
+      <div class="module-info">
+        <div class="module-tag">안전망 · 위기 지원</div>
+        <div class="module-title">사각지대 없는 맞춤형 통합지원 안전망</div>
+        <div class="module-desc">발견→진단→지원→환류 절차 / 학생맞춤통합지원위원회 / Wee 프로젝트 연계</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+
+      <div class="field-group">
+        <div class="field-label">📋 발견-지원-환류 절차</div>
+        <table class="mini-table">
+          <tr><th class="t-num">순</th><th>절차</th><th>세부 내용</th><th>시기</th></tr>
+          <tr><td class="t-num">1</td><td class="t-cat">[발견] 진단</td><td>000 사각지대 학생 다면적 심층 진단<br>담임·전문상담교사 위기 징후 상시 모니터링</td><td>학기 초</td></tr>
+          <tr><td class="t-num">2</td><td class="t-cat">[지원] 처방</td><td>학생맞춤통합지원팀 집중 사례 관리<br>Wee센터·의료기관 연계 심리·정서 치유</td><td>연중 수시</td></tr>
+          <tr><td class="t-num">3</td><td class="t-cat">[지원] 연계</td><td>복합 위기 학생 지역 전문기관 연계<br>보호자 연계 상담 및 가정 지원</td><td>연중 수시</td></tr>
+          <tr><td class="t-num">4</td><td class="t-cat">[환류] 복귀</td><td>맞춤형 대안교육·멘토링 연계 학업 복귀<br>추수지도를 통한 지속 성장 지원</td><td>지속</td></tr>
+        </table>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label teal">🔑 핵심 키워드</div>
+        <div class="kw-row">
+          <span class="kw y">학생맞춤통합지원위원회</span>
+          <span class="kw y">학생맞춤통합지원 조례</span>
+          <span class="kw g">Wee 프로젝트(클래스·센터·스쿨)</span>
+          <span class="kw g">충남온학력 3단계 지원망</span>
+          <span class="kw">사회정서학습(SEL)</span>
+          <span class="kw">충남학생지킴이 앱</span>
+          <span class="kw r">발견→지원→환류 체계</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label rose">🎯 적용 가능 주제</div>
+        <div class="topic-row">
+          <span class="topic" style="background:rgba(201,64,64,0.15);color:#e88494">학생정신건강</span>
+          <span class="topic" style="background:rgba(232,74,95,0.15);color:#e88494">학교폭력예방</span>
+          <span class="topic" style="background:rgba(46,181,160,0.15);color:#7ad8c8">기초학력</span>
+          <span class="topic" style="background:rgba(155,89,182,0.15);color:#c89ae8">교육복지</span>
+          <span class="topic" style="background:rgba(64,160,96,0.15);color:#80d0a0">특수·통합교육</span>
+          <span class="topic" style="background:rgba(74,144,226,0.15);color:#8ab8ee">돌봄</span>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        "단 한 명의 아이도 포기하지 않는 교육"이라는 충남교육 핵심 표현과 직결. 이 모듈은 기존 모듈6(지역 연계 실천 프로젝트)의 '안전망 버전'으로 기능. "학생맞춤통합지원 조례(2026 신규)" 반드시 언급.
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 모듈 11 ─── -->
+  <div class="module c5" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>11</div>
+      <div class="module-info">
+        <div class="module-tag">평가 · 성과관리</div>
+        <div class="module-title">사업 성과관리: 홍보-평가-환류-확산 체계</div>
+        <div class="module-desc">유레카 설문·타운홀 미팅·현장평가단 / 사례집 발간·마주온 탑재 / 우수 기관 표창</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+
+      <div class="field-group">
+        <div class="field-label">📋 사업 관리 4체계 (PDF 원형 그대로)</div>
+        <div class="tri-grid" style="grid-template-columns:1fr 1fr;gap:0.5rem">
+          <div class="tri-box">
+            <div class="tri-title">📣 홍보</div>
+            <div class="tri-items">
+              • 충남에듀있슈 사례 나눔<br>
+              • 마주온 영상·콘텐츠 활용<br>
+              • 지역언론·SNS 연계<br>
+              • 행복나눔 충남교육 소식지
+            </div>
+          </div>
+          <div class="tri-box">
+            <div class="tri-title">📊 평가</div>
+            <div class="tri-items">
+              • 유레카 설문 만족도 조사<br>
+              • 분기별 타운홀 미팅<br>
+              • 현장평가단 상시 운영<br>
+              • 마주온 모니터링
+            </div>
+          </div>
+          <div class="tri-box">
+            <div class="tri-title">🔄 환류</div>
+            <div class="tri-items">
+              • 설문 결과 분석<br>
+              • 데이터 기반 개선 과제 도출<br>
+              • 차기년도 계획 반영<br>
+              • 정책 협의회 보고
+            </div>
+          </div>
+          <div class="tri-box">
+            <div class="tri-title">🏆 확산</div>
+            <div class="tri-items">
+              • 우수 기관·학교 표창<br>
+              • 우수 교원 인센티브<br>
+              • 사례집 발간(책자+마주온)<br>
+              • 도내 전역 일반화
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label teal">🔑 핵심 키워드</div>
+        <div class="kw-row">
+          <span class="kw y">유레카 설문</span><span class="kw y">타운홀 미팅</span>
+          <span class="kw y">충남에듀있슈</span><span class="kw y">행복나눔 충남교육 소식지</span>
+          <span class="kw g">현장평가단</span><span class="kw g">마주온 탑재</span>
+          <span class="kw">데이터 기반 개선</span><span class="kw">교육감 표창</span>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        실무안의 Ⅶ 사업관리 섹션에 그대로 삽입 가능한 만능 모듈. 모든 주제의 마지막 섹션에 반드시 포함. "유레카 설문"과 "타운홀 미팅"은 충남 고유 표현으로 채점 키워드.
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 모듈 12 ─── -->
+  <div class="module c6" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>12</div>
+      <div class="module-info">
+        <div class="module-tag">플랫폼 · 디지털 인프라</div>
+        <div class="module-title">마주온 기반 디지털 인프라 활용 지원</div>
+        <div class="module-desc">충남 미래교육 통합플랫폼 마주온 / 소통톡·수업톡·미래톡 / 온배움터·마주온 톡톡</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+
+      <div class="field-group">
+        <div class="field-label">📋 마주온 3대 서비스 활용</div>
+        <div class="tri-grid">
+          <div class="tri-box">
+            <div class="tri-title">소통톡 (소통)</div>
+            <div class="tri-items">
+              충남톡: 교직원·학생·학부모<br>
+              충남온설문: 유레카 설문<br>
+              충남온메일·일정관리<br>
+              클로바노트 회의록
+            </div>
+          </div>
+          <div class="tri-box">
+            <div class="tri-title">수업톡 (수업)</div>
+            <div class="tri-items">
+              충남온배움터 혼합수업<br>
+              아이글AI 서논술 평가<br>
+              손글씨 AI 환류 시스템<br>
+              퀴즈앤·미리캔버스
+            </div>
+          </div>
+          <div class="tri-box">
+            <div class="tri-title">미래톡 (미래)</div>
+            <div class="tri-items">
+              AI·SW교육 자료<br>
+              생태환경교육 자료<br>
+              인수레(메타버스·에듀테크)<br>
+              마주온 톡톡(생성형 AI)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">📋 업무경감 활용</div>
+        <table class="mini-table">
+          <tr><th class="t-num">순</th><th>기능</th><th>활용 내용</th><th>대상</th></tr>
+          <tr><td class="t-num">1</td><td class="t-cat">업무 경감</td><td>마주온 업무폴더로 자료 제출·보고 일원화<br>공통가정통신문 일괄 발송</td><td>전체 학교</td></tr>
+          <tr><td class="t-num">2</td><td class="t-cat">수업 지원</td><td>교육데이터 분석 시스템으로 학생 맞춤 수업<br>AI 서논술형 환류로 평가 혁신</td><td>교사</td></tr>
+          <tr><td class="t-num">3</td><td class="t-cat">자료 탑재</td><td>우수 사례·수업자료 마주온 탑재·공유<br>인수레 120종 실증 탑재</td><td>전체</td></tr>
+        </table>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label teal">🔑 핵심 키워드</div>
+        <div class="kw-row">
+          <span class="kw y">마주온(충남 미래교육통합플랫폼)</span>
+          <span class="kw y">마주온 톡톡(충남형 생성형 AI)</span>
+          <span class="kw g">인수레(메타버스 기반 에듀테크 실증)</span>
+          <span class="kw g">손글씨 기반 AI 서논술형 환류 시스템</span>
+          <span class="kw">마주온 교육데이터 분석 시스템</span>
+          <span class="kw">학교지원디지털시스템</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label rose">🎯 적용 가능 주제</div>
+        <div class="topic-row">
+          <span class="topic" style="background:rgba(74,144,226,0.15);color:#8ab8ee">AI·디지털교육</span>
+          <span class="topic" style="background:rgba(46,181,160,0.15);color:#7ad8c8">기초학력</span>
+          <span class="topic" style="background:rgba(201,162,39,0.15);color:#d4b858">교원역량강화</span>
+          <span class="topic" style="background:rgba(155,89,182,0.15);color:#c89ae8">교육과정 혁신</span>
+          <span class="topic" style="background:rgba(64,160,96,0.15);color:#80d0a0">환경교육</span>
+          <span class="topic" style="background:rgba(232,122,64,0.15);color:#f0b090">모든 주제</span>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        "자료 보급 방법: 마주온 등 온라인 탑재"는 모든 실무안의 기본 표현으로 사용 가능. AI교육·교원역량·행정경감 주제에서는 마주온 세 서비스(소통톡·수업톡·미래톡)를 명시적으로 구분하면 가점.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== 탭2: 조합 가이드 ===== -->
+<div class="section" id="tab-guide">
+
+  <div class="guide">
+    <strong>조합 원칙:</strong> 모든 실무안은 <strong>3개 이상의 모듈을 조합</strong>하여 작성하면 됩니다.<br>
+    "다.가.감" 구조(다지기·가꾸기·감싸기)에 각 모듈을 배치하는 것이 핵심입니다.
+  </div>
+
+  <div class="sec-label">🗺️ 다.가.감 프레임 × 12개 모듈 매핑</div>
+
+  <div class="tri-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:0.5rem;margin-bottom:1.5rem">
+    <div class="tri-box" style="border-top:3px solid #2e7dd1">
+      <div class="tri-title" style="color:#6ab0e8">다지기 (지원 기반)</div>
+      <div class="tri-items">
+        MOD1 현장지원단<br>
+        MOD2 역량강화연수<br>
+        MOD7 진단-데이터<br>
+        MOD8 이끎학교<br>
+        MOD12 마주온 인프라
+      </div>
+    </div>
+    <div class="tri-box" style="border-top:3px solid #2cb5a0">
+      <div class="tri-title" style="color:#6ad8c8">가꾸기 (교육과정·주도성)</div>
+      <div class="tri-items">
+        MOD3 학생주도 프로젝트<br>
+        MOD4 충남형 모델개발<br>
+        MOD8 이끎학교<br>
+        MOD9 학생자치·동아리<br>
+        MOD7 AI 맞춤학습
+      </div>
+    </div>
+    <div class="tri-box" style="border-top:3px solid #9b59b6">
+      <div class="tri-title" style="color:#c89ae8">감싸기 (교육생태계)</div>
+      <div class="tri-items">
+        MOD5 지역 거버넌스<br>
+        MOD6 지역연계 프로젝트<br>
+        MOD10 안전망<br>
+        MOD11 성과관리
+      </div>
+    </div>
+    <div class="tri-box" style="border-top:3px solid var(--gold2)">
+      <div class="tri-title" style="color:var(--gold)">모든 섹션 공통</div>
+      <div class="tri-items">
+        MOD11 성과관리<br>
+        MOD12 마주온 탑재<br>
+        (홍보·평가·환류·확산은<br>반드시 포함)
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-label">📐 주제별 추천 모듈 조합</div>
+
+  <table class="match-table">
+    <tr>
+      <th style="width:120px">실무 주제</th>
+      <th>다지기 (기반)</th>
+      <th>가꾸기 (내용)</th>
+      <th>감싸기 (생태계)</th>
+    </tr>
+    <tr>
+      <td class="subject">인성교육</td>
+      <td class="modules">MOD1 현장지원단<br>MOD2 역량강화<br>MOD7 진단</td>
+      <td class="modules">MOD3 학생 프로젝트<br>MOD9 자치·동아리<br>MOD4 충남형 모델</td>
+      <td class="modules">MOD5 지역 거버넌스<br>MOD10 안전망<br>MOD11 성과관리</td>
+    </tr>
+    <tr>
+      <td class="subject">기초학력</td>
+      <td class="modules">MOD7 데이터 진단<br>MOD1 현장지원단<br>MOD12 마주온</td>
+      <td class="modules">MOD3 학생 참여<br>MOD8 이끎학교<br>MOD4 모델확산</td>
+      <td class="modules">MOD10 안전망<br>MOD5 지역연계<br>MOD11 성과관리</td>
+    </tr>
+    <tr>
+      <td class="subject">AI·디지털교육</td>
+      <td class="modules">MOD12 마주온 인프라<br>MOD8 이끎학교<br>MOD1 현장지원단</td>
+      <td class="modules">MOD7 AI 맞춤학습<br>MOD3 학생 프로젝트<br>MOD9 동아리</td>
+      <td class="modules">MOD5 거버넌스<br>MOD6 지역 실천<br>MOD11 성과관리</td>
+    </tr>
+    <tr>
+      <td class="subject">민주시민교육</td>
+      <td class="modules">MOD2 역량강화<br>MOD8 민주학교<br>MOD1 현장지원단</td>
+      <td class="modules">MOD9 학생자치<br>MOD3 학생 프로젝트<br>MOD4 모델확산</td>
+      <td class="modules">MOD6 지역 실천<br>MOD5 거버넌스<br>MOD11 성과관리</td>
+    </tr>
+    <tr>
+      <td class="subject">환경교육</td>
+      <td class="modules">MOD8 탄소중립이끎학교<br>MOD2 역량강화<br>MOD1 지원단</td>
+      <td class="modules">MOD3 학생 프로젝트<br>MOD9 환경동아리<br>MOD12 마주온</td>
+      <td class="modules">MOD5 지역 거버넌스<br>MOD6 SDGs 실천<br>MOD11 성과관리</td>
+    </tr>
+    <tr>
+      <td class="subject">진로·직업교육</td>
+      <td class="modules">MOD1 현장지원단<br>MOD7 진로이음 진단<br>MOD12 마주온</td>
+      <td class="modules">MOD3 학생 탐구<br>MOD9 동아리<br>MOD8 이끎학교</td>
+      <td class="modules">MOD5 지역(대학 RISE)<br>MOD6 지역 실천<br>MOD11 성과관리</td>
+    </tr>
+    <tr>
+      <td class="subject">학생정신건강</td>
+      <td class="modules">MOD7 진단-분석<br>MOD1 현장지원단<br>MOD2 역량강화</td>
+      <td class="modules">MOD9 학생 참여<br>MOD3 프로젝트<br>MOD12 마주온</td>
+      <td class="modules">MOD10 안전망<br>MOD5 지역연계<br>MOD11 성과관리</td>
+    </tr>
+    <tr>
+      <td class="subject">학교폭력 예방</td>
+      <td class="modules">MOD2 역량강화<br>MOD1 현장지원단<br>MOD7 위기 진단</td>
+      <td class="modules">MOD9 학생자치<br>MOD3 또래 프로젝트<br>MOD4 회복적 모델</td>
+      <td class="modules">MOD10 안전망<br>MOD5 지역 협력<br>MOD11 성과관리</td>
+    </tr>
+    <tr>
+      <td class="subject">교원역량·교권</td>
+      <td class="modules">MOD2 역량강화<br>MOD12 마주온 업무경감<br>MOD1 컨설팅</td>
+      <td class="modules">MOD4 수업 모델<br>MOD8 이끎학교<br>MOD7 데이터</td>
+      <td class="modules">MOD5 거버넌스<br>MOD10 교원 안전망<br>MOD11 성과관리</td>
+    </tr>
+    <tr>
+      <td class="subject">교육복지·돌봄</td>
+      <td class="modules">MOD7 진단 체계<br>MOD1 현장지원단<br>MOD12 시스템</td>
+      <td class="modules">MOD9 학생 참여<br>MOD3 프로젝트<br>MOD4 모델</td>
+      <td class="modules">MOD10 안전망<br>MOD5 거버넌스(지자체)<br>MOD11 성과관리</td>
+    </tr>
+  </table>
+
+  <div class="sec-label">✏️ 실무 문서 구조 × 모듈 삽입 위치</div>
+  <table class="match-table">
+    <tr>
+      <th style="width:100px">섹션</th>
+      <th>주로 활용하는 모듈</th>
+      <th>핵심 표현</th>
+    </tr>
+    <tr>
+      <td class="subject">Ⅰ 배경·근거</td>
+      <td>MOD10 안전망 필요성, MOD7 진단 필요성</td>
+      <td>"사회적 관심 증대, 맞춤형 통합지원 요구 확대"</td>
+    </tr>
+    <tr>
+      <td class="subject">Ⅱ 추진 목적</td>
+      <td>전체 모듈 목적 문구</td>
+      <td>"단 한 명도 소외되지 않는 촘촘한 맞춤형 안전망"</td>
+    </tr>
+    <tr>
+      <td class="subject">Ⅲ 실태(SWOT)</td>
+      <td>MOD7 진단 결과, MOD8 이끎학교 현황</td>
+      <td>"디지털 기반 조성, 현장 프로그램 부족"</td>
+    </tr>
+    <tr>
+      <td class="subject">Ⅵ 세부과제</td>
+      <td>MOD1~MOD12 조합</td>
+      <td>다지기 2개 + 가꾸기 2개 + 감싸기 2개</td>
+    </tr>
+    <tr>
+      <td class="subject">Ⅶ 사업관리</td>
+      <td>MOD11 성과관리 (고정)</td>
+      <td>"유레카 설문, 타운홀 미팅, 충남에듀있슈"</td>
+    </tr>
+    <tr>
+      <td class="subject">Ⅷ 기대효과</td>
+      <td>MOD10 안전망, MOD9 학생주도, MOD5 거버넌스</td>
+      <td>"학생 주도성 함양, 교육생태계 구축, 학교 간 격차 최소화"</td>
+    </tr>
+    <tr>
+      <td class="subject">Ⅸ 행정사항</td>
+      <td>MOD12 마주온 (자료 제출 방법)</td>
+      <td>"마주온 업무폴더에 탑재"</td>
+    </tr>
+  </table>
+
+</div>
+
+<!-- ===== 탭3: 기존 6개 요약 ===== -->
+<div class="section" id="tab-existing">
+  <div class="guide">
+    <strong>기존 6개 모듈</strong>은 이미 완성된 무기입니다. 아래는 빠른 참조용 요약입니다.
+  </div>
+
+  <div class="sec-label">📂 기존 6개 모듈 상세 요약</div>
+
+  <!-- 기존 1 -->
+  <div class="module c1" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>1</div>
+      <div class="module-info">
+        <div class="module-tag">현장 지원</div>
+        <div class="module-title">000 현장 지원단 운영</div>
+        <div class="module-desc">인력풀 구축→신청·매칭→밀착 지원→환류 / 현장 컨설팅 + 자료 보급</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+      <div class="field-group">
+        <div class="field-label">📋 운영 내용</div>
+        <table class="mini-table">
+          <tr><th>영역</th><th>세부 지원 내용</th><th>방법</th></tr>
+          <tr><td class="t-cat">현장 컨설팅</td><td>교육과정 편성·운영 어려움 진단 및 해결<br>학교별 여건 맞춤형 교수학습 전략 안내</td><td>찾아가는 대면</td></tr>
+          <tr><td class="t-cat">자료 보급</td><td>충남형 교육 자료 적기 보급<br>기본 지침·매뉴얼 제공</td><td>마주온 온라인 탑재</td></tr>
+        </table>
+      </div>
+      <div class="tip-box">운영 흐름: 인력풀 구축 → 신청·매칭 → 밀착 지원 → 환류</div>
+    </div>
+  </div>
+
+  <!-- 기존 2 -->
+  <div class="module c2" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>2</div>
+      <div class="module-info">
+        <div class="module-tag">역량 강화</div>
+        <div class="module-title">교육공동체 역량 강화 지원</div>
+        <div class="module-desc">관리자 워크숍 / 교사 수업코칭·학습공동체 / 학부모 교실 / 손수차림</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+      <div class="field-group">
+        <div class="field-label">📋 대상별 연수</div>
+        <table class="mini-table">
+          <tr><th>대상</th><th>연수명</th><th>시기</th></tr>
+          <tr><td class="t-cat">관리자</td><td>000 철학 이해·학교문화 조성 워크숍</td><td>2월</td></tr>
+          <tr><td class="t-cat">교사</td><td>수석교사 연계 수업 코칭·멘토링 ('손수차림')</td><td>연중</td></tr>
+          <tr><td class="t-cat">교사</td><td>학교 안 전문적학습공동체 우수 사례 나눔</td><td>연중</td></tr>
+          <tr><td class="t-cat">학부모</td><td>찾아가는 000 학부모 교실 ('생각나눔자리')</td><td>학기별</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기존 3 -->
+  <div class="module c3" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>3</div>
+      <div class="module-info">
+        <div class="module-tag">학생 주도</div>
+        <div class="module-title">배움과 삶을 연결하는 000 학생 주도 프로젝트</div>
+        <div class="module-desc">탐구·실천→공유·나눔 / 들락날락 연계 / 동아리 운영비+교육감 표창</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+      <div class="field-group">
+        <div class="field-label">📋 활동 내용</div>
+        <table class="mini-table">
+          <tr><th>구분</th><th>활동 내용</th><th>플랫폼</th></tr>
+          <tr><td class="t-cat">탐구·실천</td><td>실생활 연계 000 문제 발굴 및 해결 자율 탐구<br>지역사회 연계 실천 캠페인</td><td>들락날락(온오프라인)</td></tr>
+          <tr><td class="t-cat">공유·나눔</td><td>실천주간(000의 날) 연계 결과 나눔마당<br>우수 사례 도내 일반화</td><td>교내+행복교육지구</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기존 4 -->
+  <div class="module c7" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>4</div>
+      <div class="module-info">
+        <div class="module-tag">모델 개발·확산</div>
+        <div class="module-title">충남형 000 교육 일반화 모델 개발 및 확산</div>
+        <div class="module-desc">1단계 발굴(이끎학교)→2단계 검증→3단계 확산(마주온 탑재)</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+      <div class="flow">
+        <div class="flow-step"><div class="flow-num">1단계</div><div class="flow-text">발굴</div><div class="flow-sub">이끎학교 운영<br>교육과정-수업-평가 일체화</div></div>
+        <div class="flow-step"><div class="flow-num">2단계</div><div class="flow-text">검증</div><div class="flow-sub">현장 적합성 모니터링<br>우수 교수학습지도안 발간</div></div>
+        <div class="flow-step"><div class="flow-num">3단계</div><div class="flow-text">확산</div><div class="flow-sub">마주온 탑재<br>수업공개·사례나눔</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기존 5 -->
+  <div class="module c5" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>5</div>
+      <div class="module-info">
+        <div class="module-tag">지역 거버넌스</div>
+        <div class="module-title">지속가능한 동반 성장을 위한 지역 연계 협력 거버넌스 구축</div>
+        <div class="module-desc">MOU 체결 / 충남행복교육지구 연계 / RISE 대학 / 학교-마을 연계</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+      <div class="field-group">
+        <div class="field-label">📋 주체별 역할</div>
+        <table class="mini-table">
+          <tr><th>주체</th><th>핵심 역할</th></tr>
+          <tr><td class="t-cat">교육(지원)청</td><td>유관기관 협력 네트워크(MOU) 총괄<br>충남행복교육지구 예산·행정 지원</td></tr>
+          <tr><td class="t-cat">지자체·대학</td><td>대학(RISE) 인프라 개방<br>지역 전문가·예비교사 인력풀 파견</td></tr>
+          <tr><td class="t-cat">학교·마을</td><td>학교-마을 연계 생태계 구축<br>마을교육공동체 활성화</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기존 6 -->
+  <div class="module c8" onclick="toggleModule(this)">
+    <div class="module-header">
+      <div class="module-num"><div class="m-label">MOD</div>6</div>
+      <div class="module-info">
+        <div class="module-tag">지역 실천 프로젝트</div>
+        <div class="module-title">앎과 삶이 일치하는 000 지역 연계 실천 프로젝트</div>
+        <div class="module-desc">트랙1 지역대학(RISE) / 트랙2 마을공동체(지자체) / 체인지메이커</div>
+      </div>
+      <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-body">
+      <div class="field-group">
+        <div class="field-label">📋 2트랙 운영</div>
+        <table class="mini-table">
+          <tr><th>트랙</th><th>연계 거점</th><th>핵심 실천</th><th>플랫폼</th></tr>
+          <tr><td class="t-cat">트랙1</td><td>지역대학<br>(RISE 연계)</td><td>대학생 000 멘토링·밀착 코칭<br>대학 인프라 활용 심화 탐구</td><td>RISE 인력풀</td></tr>
+          <tr><td class="t-cat">트랙2</td><td>마을공동체<br>(지자체 연계)</td><td>지역사회 체인지메이커 활동<br>지자체·NGO 연계 실천 캠페인</td><td>들락날락<br>행복교육지구</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+function toggleModule(el) {
+  el.classList.toggle('open');
+}
+</script>
+</body>
+</html>
